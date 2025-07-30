@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const generateToken = require('../utils/generateToken');
 const { v4: uuidv4 } = require('uuid');
+const { sendVerifyEmail } = require('../helper/email.helper');
 
 const loginUser = async (req, res) => {
   try {
@@ -121,9 +122,16 @@ const registerUser = async (req, res) => {
       issuer: '@codeguyakash',
     });
 
+    let emailResponse = await sendVerifyEmail(email, name, token);
+    console.log(emailResponse.error);
+
+    if (!emailResponse.error) {
+      console.log('Email Sent Successfully');
+    }
+
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: 'Registration successful, please verify your email',
       token,
       user,
     });
@@ -153,6 +161,17 @@ const allUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
+    });
+  }
+};
+
+const verifyUser = async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(409).json({
+      success: false,
+      message: 'User already exists',
+      errorCode: 'AUTH_USER_EXISTS',
     });
   }
 };
