@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { sendVerifyEmail } = require('../helper/email.helper');
+const jwt = require('jsonwebtoken');
 
 const {
   generateAccessToken,
@@ -223,6 +224,64 @@ const verifyUser = async (req, res) => {
   }
 };
 
+const refreshAccessToken = async (req, res) => {
+  const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  try {
+    if (!incomingToken) {
+      return res
+        .status(401)
+        .json(new ApiResponse(401, null, 'Refresh token is required'));
+    }
+    const decodedToken = jwt.verify(incomingToken, process.env.JWT_SECRET);
+    const userId = decodedToken.id;
+
+    const [userRows] = await req.db.query('SELECT * FROM users WHERE id = ? ', [
+      userId,
+    ]);
+
+    if (userRows.length === 0) {
+      return res
+        .status(403)
+        .json(
+          new ApiResponse(403, null, 'Invalid refresh token or user not found')
+        );
+    }
+    const user = userRows[0];
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      uuid: user.uuid,
+      is_verified: user.is_verified,
+    });
+
+    await req.db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
+      refreshToken,
+      user.id,
+    ]);
+
+    return res
+      .status(200)
+      .cookie('accessToken', accessToken, options)
+      .cookie('refreshToken', refreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken },
+          'Access token refreshed successfully'
+        )
+      );
+  } catch (error) {
+    console.log('❌ Error in refreshAccessToken:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal server error'));
+  }
+};
+
 const allUsers = async (req, res) => {
   try {
     const [rows] = await req.db.query('SELECT * from users;');
@@ -247,4 +306,5 @@ module.exports = {
   allUsers,
   verifyUser,
   logoutUser,
+  refreshAccessToken,
 };
