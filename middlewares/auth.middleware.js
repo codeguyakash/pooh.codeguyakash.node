@@ -1,14 +1,15 @@
 const jwt = require('jsonwebtoken');
+const ApiResponse = require('../utils/ApiResponse');
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized: Token missing',
-      errorCode: 'AUTH_TOKEN_MISSING',
-    });
+    return res
+      .status(401)
+      .json(
+        new ApiResponse(401, null, 'Unauthorized: Invalid or expired token')
+      );
   }
 
   const token = authHeader.split(' ')[1];
@@ -18,10 +19,10 @@ module.exports = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized: Invalid or expired token',
-      errorCode: 'AUTH_INVALID_TOKEN',
-    });
+    return res
+      .status(401)
+      .json(
+        new ApiResponse(401, null, 'Unauthorized: Invalid or expired token')
+      );
   }
 };
