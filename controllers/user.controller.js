@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
-const generateToken = require('../utils/generateToken');
 const { v4: uuidv4 } = require('uuid');
 const { sendVerifyEmail } = require('../helper/email.helper');
+
+const generateToken = require('../utils/generateToken');
+const generateEmailToken = require('../utils/emailToken');
 
 const loginUser = async (req, res) => {
   try {
@@ -75,7 +77,7 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   const { email, password, name } = req.body;
-
+  let verificationToken = generateEmailToken(20);
   if (!email || !password || !name) {
     return res.status(400).json({
       success: false,
@@ -105,8 +107,8 @@ const registerUser = async (req, res) => {
     const uuid = uuidv4();
 
     const [result] = await req.db.query(
-      'INSERT INTO users (uuid, name, email, password, is_verified, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
-      [uuid, name, email, hashedPassword, false]
+      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token ,created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [uuid, name, email, hashedPassword, false, verificationToken]
     );
 
     const user = {
@@ -122,11 +124,10 @@ const registerUser = async (req, res) => {
       issuer: '@codeguyakash',
     });
 
-    let emailResponse = await sendVerifyEmail(email, name, token);
-    console.log(emailResponse.error);
+    let emailResponse = await sendVerifyEmail(email, name, verificationToken);
 
     if (!emailResponse.error) {
-      console.log('Email Sent Successfully');
+      console.log('Email Sent Successfully', emailResponse.data.id);
     }
 
     return res.status(201).json({
@@ -167,6 +168,19 @@ const allUsers = async (req, res) => {
 
 const verifyUser = async (req, res) => {
   try {
+    const { token } = req?.query;
+
+    const [result] = await req.db.query(
+      'SELECT id FROM users WHERE verification_token = ?',
+      [token]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'User verified successfully',
+      token,
+      userId: result[0]?.id || {},
+    });
   } catch (error) {
     return res.status(409).json({
       success: false,
@@ -180,4 +194,5 @@ module.exports = {
   loginUser,
   registerUser,
   allUsers,
+  verifyUser,
 };

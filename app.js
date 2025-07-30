@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/user.routes');
+
 const rateLimiter = require('./middlewares/ratelimiter.middleware');
 const databaseMiddleware = require('./middlewares/db.middleware');
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/verify', authRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
