@@ -47,6 +47,8 @@ const loginUser = async (req, res) => {
         uuid: user.uuid,
         email: user.email,
         role: user.role,
+        is_verified: user.is_verified === 1 ? true : false,
+        name: user.name,
       },
       {
         expiresIn: '2h',
@@ -59,11 +61,11 @@ const loginUser = async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        id: user.id,
         uuid: user.uuid,
         name: user.name,
         email: user.email,
         role: user.role,
+        is_verified: user.is_verified === 1 ? true : false,
       },
     });
   } catch (error) {
@@ -118,7 +120,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       uuid,
-      isVerified: false,
+      is_verified: false,
     };
 
     const token = accessToken(user, {
@@ -175,6 +177,18 @@ const verifyUser = async (req, res) => {
     const [result] = await req.db.query(
       'SELECT id FROM users WHERE verification_token = ?',
       [token]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or expired verification token',
+        errorCode: 'AUTH_INVALID_VERIFICATION_TOKEN',
+      });
+    }
+    await req.db.query(
+      'UPDATE users SET is_verified = true, verification_token = NULL WHERE id = ?',
+      [result[0].id]
     );
 
     return res.status(200).json({
