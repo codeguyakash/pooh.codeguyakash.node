@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { sendVerifyEmail } = require('../helper/email.helper');
 const jwt = require('jsonwebtoken');
+const ApiResponse = require('../utils/ApiResponse');
 
 const {
   generateAccessToken,
@@ -9,7 +10,6 @@ const {
 } = require('../utils/generateToken');
 
 const emailToken = require('../utils/emailToken');
-const ApiResponse = require('../utils/ApiResponse');
 
 const options = {
   httpOnly: true,

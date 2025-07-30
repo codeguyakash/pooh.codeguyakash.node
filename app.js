@@ -3,6 +3,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/user.routes');
 
+const os = require('os');
+
 const rateLimiter = require('./middlewares/ratelimiter.middleware');
 const databaseMiddleware = require('./middlewares/db.middleware');
 
@@ -17,6 +19,32 @@ app.use(cookieParser());
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/verify', authRoutes);
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString(),
+    system: {
+      os: os.type(),
+      platform: os.platform(),
+      arch: os.arch(),
+      hostname: os.hostname(),
+      cpuUsage: os.loadavg(),
+      uptime: os.uptime(),
+      userInfo: os.userInfo(),
+      numberOfCpus: os.cpus().length,
+      memoryUsage: {
+        total: os.totalmem(),
+        free: os.freemem(),
+      },
+    },
+  });
+});
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Node.js Login Auth API');
+});
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
