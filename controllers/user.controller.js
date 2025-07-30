@@ -2,8 +2,8 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { sendVerifyEmail } = require('../helper/email.helper');
 
-const generateToken = require('../utils/generateToken');
-const generateEmailToken = require('../utils/emailToken');
+const accessToken = require('../utils/accessToken');
+const emailToken = require('../utils/emailToken');
 
 const loginUser = async (req, res) => {
   try {
@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = generateToken(
+    const token = accessToken(
       {
         id: user.id,
         uuid: user.uuid,
@@ -77,7 +77,9 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   const { email, password, name } = req.body;
-  let verificationToken = generateEmailToken(20);
+
+  let verificationToken = emailToken(20);
+
   if (!email || !password || !name) {
     return res.status(400).json({
       success: false,
@@ -119,7 +121,7 @@ const registerUser = async (req, res) => {
       isVerified: false,
     };
 
-    const token = generateToken(user, {
+    const token = accessToken(user, {
       expiresIn: '2h',
       issuer: '@codeguyakash',
     });

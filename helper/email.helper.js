@@ -16,7 +16,7 @@ async function sendVerifyEmail(to, userName, token) {
 
   try {
     const res = await resend.emails.send({
-      from: `NODE <no-reply@codeguyakash.in>`,
+      from: `CODEGUYAKASH <no-reply@codeguyakash.in>`,
       to,
       subject: `Verify your email address`,
       html,
