@@ -1,49 +1,47 @@
 const request = require('supertest');
-const app = require('../app');
+const app = require('../app'); // yeh teri Express app file ka export hona chahiye
 
 describe('POST /api/v1/auth/login', () => {
-  it('✅ should return 200 and token for valid credentials', async () => {
-    const res = await request(app).post('/api/v1/auth/login').send({
-      email: 'test@example.com',
-      password: 'password123',
+  it('should login user with valid credentials', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: 'codeguyakash.dev@gmail.com',
+      password: 'Hello@#123',
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.token).toBeDefined();
-    expect(res.body.user.email).toBe('test@example.com');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('data');
+    expect(response.body.data).toHaveProperty('accessToken');
+    expect(response.body.data).toHaveProperty('refreshToken');
+    expect(response.body.message).toBe('Login Successfully');
   });
 
-  it('❌ should return 401 for incorrect password', async () => {
-    const res = await request(app).post('/api/v1/auth/login').send({
-      email: 'test@example.com',
-      password: 'wrongpassword',
+  it('should return 404 for non-existing user', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: 'fakeuser@example.com',
+      password: 'irrelevant',
     });
 
-    expect(res.statusCode).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.errorCode).toBe('AUTH_INVALID_PASSWORD');
+    expect(response.statusCode).toBe(404);
+    expect(response.body.message).toBe('User not found');
   });
 
-  it('❌ should return 401 for non-existent user', async () => {
-    const res = await request(app).post('/api/v1/auth/login').send({
-      email: 'nouser@example.com',
-      password: 'password123',
+  it('should return 401 for wrong password', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
+      email: 'codeguyakash.dev@gmail.com',
+      password: 'wrong-password',
     });
 
-    expect(res.statusCode).toBe(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.errorCode).toBe('AUTH_INVALID_USER');
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe('Invalid user credentials');
   });
 
-  it('❌ should return 400 for missing email or password', async () => {
-    const res = await request(app).post('/api/v1/auth/login').send({
+  it('should return 400 if fields are missing', async () => {
+    const response = await request(app).post('/api/v1/auth/login').send({
       email: '',
       password: '',
     });
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body.success).toBe(false);
-    expect(res.body.errorCode).toBe('AUTH_MISSING_FIELDS');
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Please provide email and password');
   });
 });

@@ -38,6 +38,39 @@ const registerUser = async (req, res) => {
       .json(new ApiResponse(400, null, 'Please provide all required fields'));
   }
 
+  if (
+    email.length < 5 ||
+    email.length > 100 ||
+    password.length < 6 ||
+    password.length > 64
+  ) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, 'Email or password length is invalid'));
+  }
+  const allowedDomains = [
+    '@gmail.com',
+    '@outlook.com',
+    '@icloud.com',
+    '@codeguyakash.in',
+  ];
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (
+    !emailPattern.test(email) ||
+    !allowedDomains.some((domain) => email.endsWith(domain))
+  ) {
+    return res
+      .status(400)
+      .json(
+        new ApiResponse(
+          400,
+          null,
+          'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
+        )
+      );
+  }
+
   try {
     const [existingUsers] = await req.db.query(
       'SELECT id FROM users WHERE email = ?',
@@ -113,6 +146,41 @@ const loginUser = async (req, res) => {
       return res
         .status(400)
         .json(new ApiResponse(400, null, 'Please provide email and password'));
+    }
+
+    if (
+      email.length < 5 ||
+      email.length > 100 ||
+      password.length < 6 ||
+      password.length > 64
+    ) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(400, null, 'Email or password length is invalid')
+        );
+    }
+
+    const allowedDomains = [
+      '@gmail.com',
+      '@outlook.com',
+      '@icloud.com',
+      '@codeguyakash.in',
+    ];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (
+      !emailPattern.test(email) ||
+      !allowedDomains.some((domain) => email.endsWith(domain))
+    ) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(
+            400,
+            null,
+            'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
+          )
+        );
     }
 
     const [rows] = await req.db.query('SELECT * FROM users WHERE email = ?', [
