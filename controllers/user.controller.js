@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs');
 const generateToken = require('../utils/generateToken');
 const { v4: uuidv4 } = require('uuid');
 
-const uniqueId = uuidv4();
-
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -103,16 +101,18 @@ const registerUser = async (req, res) => {
       parseInt(process.env.SALT_ROUNDS) || 12
     );
 
+    const uuid = uuidv4();
+
     const [result] = await req.db.query(
       'INSERT INTO users (uuid, name, email, password, is_verified, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
-      [uniqueId, name, email, hashedPassword, false]
+      [uuid, name, email, hashedPassword, false]
     );
 
     const user = {
       id: result.insertId,
       name,
       email,
-      uuid: uniqueId,
+      uuid,
       isVerified: false,
     };
 
