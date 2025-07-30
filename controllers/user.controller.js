@@ -83,7 +83,7 @@ const registerUser = async (req, res) => {
     let emailResponse = await sendVerifyEmail(email, name, verificationToken);
 
     if (!emailResponse.error) {
-      console.log('Email Sent Successfully', emailResponse.data.id);
+      console.log('Email Sent Successfully');
     }
 
     user.id = result.insertId;
@@ -199,23 +199,20 @@ const verifyUser = async (req, res) => {
     );
 
     if (result.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Invalid or expired verification token',
-        errorCode: 'AUTH_INVALID_VERIFICATION_TOKEN',
-      });
+      return res
+        .status(400)
+        .send(
+          '<p style="text-align:center; font-size:20px;">Invalid or expired token</p>'
+        );
     }
     await req.db.query(
       'UPDATE users SET is_verified = true, verification_token = NULL WHERE id = ?',
       [result[0].id]
     );
 
-    return res.status(200).json({
-      success: true,
-      message: 'User verified successfully',
-      token,
-      userId: result[0]?.id || {},
-    });
+    return res
+      .status(200)
+      .send('<p style="text-align:center; font-size:20px;">Verified</p>');
   } catch (error) {
     console.error('❌ Verification error:', error.message);
     return res
@@ -285,14 +282,9 @@ const refreshAccessToken = async (req, res) => {
 const allUsers = async (req, res) => {
   try {
     const [rows] = await req.db.query('SELECT * from users;');
-
-    return res.status(200).json({
-      success: true,
-      message: 'Users retrieved successfully',
-      data: {
-        rows,
-      },
-    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { rows }, 'Users retrieved successfully'));
   } catch (error) {
     console.error('❌ Login error:', error.message);
     return res

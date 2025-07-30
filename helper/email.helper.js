@@ -9,7 +9,6 @@ async function sendVerifyEmail(to, userName, token) {
       <a href="${process.env.HOST_URL}/verify?token=${token}">
         Verify Email
       </a>
-      <p>${process.env.HOST_URL}/verify?token=${token}</p>
       <p>If you did not register, you can safely ignore this email.</p>
     </div>
   `;
