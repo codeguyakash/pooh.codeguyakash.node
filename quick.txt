@@ -1,0 +1,1 @@
+mysql --user avnadmin --password=AVNS_iq9Ql0A_Wyw8pA_sx9I --host mysql-1770a206-codeguyakash-dev.j.aivencloud.com --port 27218 defaultdb
