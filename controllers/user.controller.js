@@ -233,23 +233,43 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    const { accessToken, refreshToken } = req?.cookies;
-    let userId = req?.user?.id || null;
+    // Web: Tokens from cookies
+    let accessToken = req.cookies?.accessToken;
+    let refreshToken = req.cookies?.refreshToken;
+
+    // Mobile: Tokens from headers or body (fallbacks)
+    if (!accessToken) {
+      accessToken =
+        req.headers['authorization']?.split(' ')[1] || req.body?.accessToken;
+    }
+
+    if (!refreshToken) {
+      refreshToken = req.headers['x-refresh-token'] || req.body?.refreshToken;
+    }
+
+    const userId = req?.user?.id || null;
 
     if (!accessToken || !refreshToken) {
       return res
         .status(400)
         .json(new ApiResponse(400, null, 'No tokens provided'));
     }
-    await req.db.query('UPDATE users SET refresh_token = NULL WHERE id = ?', [
-      userId,
-    ]);
 
-    return res
-      .status(200)
-      .clearCookie('accessToken', options)
-      .clearCookie('refreshToken', options)
-      .json(new ApiResponse(200, null, 'Logged out successfully'));
+    if (userId) {
+      await req.db.query('UPDATE users SET refresh_token = NULL WHERE id = ?', [
+        userId,
+      ]);
+    }
+
+    // Clear cookies if present (for web clients)
+    const response = res.status(200);
+    if (req.cookies?.accessToken || req.cookies?.refreshToken) {
+      response
+        .clearCookie('accessToken', options)
+        .clearCookie('refreshToken', options);
+    }
+
+    return response.json(new ApiResponse(200, null, 'Logged out successfully'));
   } catch (error) {
     console.error('❌ Logout error:', error.message);
     return res
