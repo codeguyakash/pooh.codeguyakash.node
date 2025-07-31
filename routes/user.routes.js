@@ -9,6 +9,7 @@ const {
   logoutUser,
   refreshAccessToken,
   deleteUser,
+  userDetails,
 } = require('../controllers/user.controller');
 const auth = require('../middlewares/auth.middleware');
 
@@ -18,6 +19,7 @@ router.post('/refresh-token', refreshAccessToken);
 
 router.get('/logout', auth, logoutUser);
 router.get('/users', auth, allUsers);
+router.get('/user/:id', auth, userDetails);
 router.delete('/user/delete/:id', auth, deleteUser);
 
 //verify user route

@@ -10,7 +10,7 @@ const connectDB = async () => {
       host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || 'roottoor',
-      database: process.env.DB_NAME || 'nodeapp',
+      database: process.env.DB_NAME || 'node_app',
       port: process.env.DB_PORT || 3306,
       waitForConnections: true,
       connectionLimit: 10,

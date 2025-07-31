@@ -258,6 +258,45 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const userDetails = async (req, res) => {
+  console.log('Hit user details controller');
+  try {
+    const userId = req.params.id;
+
+    console.log(userId, req.user);
+
+    if (!userId && !req.user) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, 'User ID is required'));
+    }
+
+    const [rows] = await req.db.query('SELECT * FROM users WHERE id = ?', [
+      userId,
+    ]);
+    console.log('Rows:', rows);
+
+    if (rows.length === 0) {
+      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+    }
+
+    const user = rows[0];
+
+    console.log(user);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, { user }, 'User details retrieved successfully')
+      );
+  } catch (error) {
+    console.error('❌ User details error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal server error'));
+  }
+};
+
 const verifyUser = async (req, res) => {
   try {
     const { token } = req?.query;
@@ -412,4 +451,5 @@ module.exports = {
   deleteUser,
   logoutUser,
   refreshAccessToken,
+  userDetails,
 };
