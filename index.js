@@ -8,6 +8,7 @@ connectDB()
   .then((db) => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🔗 API is accessible at: ${process.env.HOST_URL}`);
       console.log('✅ Database connected successfully');
     });
   })

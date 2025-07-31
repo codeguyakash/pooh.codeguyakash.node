@@ -3,15 +3,18 @@ const resend = new Resend(process.env.RESEND_API_KEY || 'RESEND_API_KEY');
 
 async function sendVerifyEmail(to, userName, token) {
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <p>Hi ${userName},</p>
-      <p>Thank you for registering! Please verify your email by clicking the button below:</p>
-      <a href="${process.env.HOST_URL}/verify?token=${token}">
-        Verify Email
-      </a>
-      <p>If you did not register, you can safely ignore this email.</p>
-    </div>
-  `;
+  <div style="font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6;">
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+    </style>
+    <p>Hi ${userName},</p>
+    <p>Thank you for registering! Please verify your email by clicking the button below:</p>
+    <a href="${process.env.HOST_URL}/verify?token=${token}">
+      Verify Email
+    </a>
+    <p>If you did not register, you can safely ignore this email.</p>
+  </div>
+`;
 
   try {
     const res = await resend.emails.send({

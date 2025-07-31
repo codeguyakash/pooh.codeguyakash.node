@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const { sendVerifyEmail } = require('../helper/email.helper');
 const jwt = require('jsonwebtoken');
 const ApiResponse = require('../utils/ApiResponse');
+const { htmlTemplateGenerator } = require('../utils/htmlTemplateGenerator');
 
 const {
   generateAccessToken,
@@ -270,9 +271,14 @@ const verifyUser = async (req, res) => {
       return res
         .status(400)
         .send(
-          '<p style="text-align:center; font-size:20px;">Invalid or expired token</p>'
+          htmlTemplateGenerator(
+            'Email Verification',
+            'Invalid or expired token',
+            false
+          )
         );
     }
+
     await req.db.query(
       'UPDATE users SET is_verified = true, verification_token = NULL WHERE id = ?',
       [result[0].id]
@@ -280,7 +286,13 @@ const verifyUser = async (req, res) => {
 
     return res
       .status(200)
-      .send('<p style="text-align:center; font-size:20px;">Verified</p>');
+      .send(
+        htmlTemplateGenerator(
+          'Email Verification',
+          'Thank you for verifying your email!',
+          true
+        )
+      );
   } catch (error) {
     console.error('❌ Verification error:', error.message);
     return res
@@ -352,7 +364,9 @@ const allUsers = async (req, res) => {
     const [rows] = await req.db.query('SELECT * from users;');
     return res
       .status(200)
-      .json(new ApiResponse(200, { rows }, 'Users retrieved successfully'));
+      .json(
+        new ApiResponse(200, { users: rows }, 'Users retrieved successfully')
+      );
   } catch (error) {
     console.error('❌ Login error:', error.message);
     return res
@@ -360,11 +374,42 @@ const allUsers = async (req, res) => {
       .json(new ApiResponse(500, null, 'Internal server error'));
   }
 };
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const { all } = req.body;
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, 'User ID is required'));
+    }
+    if (!all) {
+      await req.db.query('DELETE FROM users WHERE id = ?', [userId]);
+      return res
+        .status(200)
+        .json(new ApiResponse(200, null, 'User deleted successfully'));
+    }
+    // delete all users
+    await req.db.query('DELETE FROM users WHERE id > 0');
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'All users deleted successfully'));
+  } catch (error) {
+    console.error('❌ Delete user error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal server error'));
+  }
+};
+
 module.exports = {
   loginUser,
   registerUser,
   allUsers,
   verifyUser,
+  deleteUser,
   logoutUser,
   refreshAccessToken,
 };
