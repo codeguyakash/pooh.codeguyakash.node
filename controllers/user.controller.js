@@ -281,13 +281,18 @@ const userDetails = async (req, res) => {
     }
 
     const user = rows[0];
+    const { password, refresh_token, verification_token, ...safeUser } = user;
 
-    console.log(user);
+    console.log(safeUser);
 
     return res
       .status(200)
       .json(
-        new ApiResponse(200, { user }, 'User details retrieved successfully')
+        new ApiResponse(
+          200,
+          { user: safeUser },
+          'User details retrieved successfully'
+        )
       );
   } catch (error) {
     console.error('❌ User details error:', error.message);
