@@ -10,12 +10,14 @@ const {
   refreshAccessToken,
   deleteUser,
   userDetails,
+  verifyToken
 } = require('../controllers/user.controller');
 const auth = require('../middlewares/auth.middleware');
 
 router.post('/login', loginUser);
 router.post('/register', registerUser);
 router.post('/token-refresh', refreshAccessToken);
+router.post('/verify', verifyToken);
 
 router.get('/logout', auth, logoutUser);
 router.get('/users', auth, allUsers);
