@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
   if (!email || !password || !name) {
     return res
       .status(400)
-      .json(new ApiResponse(400, null, 'Please provide all required fields'));
+      .json(new ApiResponse(400, null, 'Please Provide All Required Fields'));
   }
 
   if (
@@ -47,14 +47,9 @@ const registerUser = async (req, res) => {
   ) {
     return res
       .status(400)
-      .json(new ApiResponse(400, null, 'Email or password length is invalid'));
+      .json(new ApiResponse(400, null, 'Email or Password Length is Invalid'));
   }
-  const allowedDomains = [
-    '@gmail.com',
-    '@outlook.com',
-    '@icloud.com',
-    '@codeguyakash.in',
-  ];
+  const allowedDomains = ['@gmail.com', '@outlook.com', '@codeguyakash.in'];
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (
@@ -67,7 +62,7 @@ const registerUser = async (req, res) => {
         new ApiResponse(
           400,
           null,
-          'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
+          'Invalid Email Domain. Use @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
         )
       );
   }
@@ -80,7 +75,7 @@ const registerUser = async (req, res) => {
     if (existingUsers.length > 0) {
       return res
         .status(409)
-        .json(new ApiResponse(409, null, 'User already exists'));
+        .json(new ApiResponse(409, null, 'User Already Exists'));
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -128,14 +123,14 @@ const registerUser = async (req, res) => {
         new ApiResponse(
           201,
           { user, accessToken, refreshToken },
-          'Registration Successfully, please verify your email to complete registration'
+          'User Registered Successfully, Please Verify Your Email to Complete Registration'
         )
       );
   } catch (err) {
     console.error('Registration error:', err.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
@@ -224,7 +219,7 @@ const loginUserOLD = async (req, res) => {
         )
       );
   } catch (error) {
-    console.error('❌ Login error:', error.message);
+    console.error(' Login error:', error.message);
     return res
       .status(500)
       .json(new ApiResponse(500, null, 'Internal server error'));
@@ -237,7 +232,7 @@ const loginUser = async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json(new ApiResponse(400, null, 'Please provide email and password'));
+        .json(new ApiResponse(400, null, 'Please Provide Email and Password'));
     }
 
     if (
@@ -249,7 +244,7 @@ const loginUser = async (req, res) => {
       return res
         .status(400)
         .json(
-          new ApiResponse(400, null, 'Email or password length is invalid')
+          new ApiResponse(400, null, 'Email or Password Length is Invalid')
         );
     }
 
@@ -271,7 +266,7 @@ const loginUser = async (req, res) => {
           new ApiResponse(
             400,
             null,
-            'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
+            'Invalid Email Domain. Use @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
           )
         );
     }
@@ -281,7 +276,7 @@ const loginUser = async (req, res) => {
     ]);
 
     if (rows.length === 0) {
-      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+      return res.status(404).json(new ApiResponse(404, null, 'User Not Found'));
     }
 
     const user = rows[0];
@@ -290,7 +285,7 @@ const loginUser = async (req, res) => {
     if (!isMatch) {
       return res
         .status(401)
-        .json(new ApiResponse(401, null, 'Invalid user credentials'));
+        .json(new ApiResponse(401, null, 'Invalid User Credentials'));
     }
 
     const payload = {
@@ -324,20 +319,18 @@ const loginUser = async (req, res) => {
         )
       );
   } catch (error) {
-    console.error('❌ Login error:', error.message);
+    console.error('Login Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
 const logoutUser = async (req, res) => {
   try {
-    // Web: Tokens from cookies
     let accessToken = req.cookies?.accessToken;
     let refreshToken = req.cookies?.refreshToken;
 
-    // Mobile: Tokens from headers or body (fallbacks)
     if (!accessToken) {
       accessToken =
         req.headers['authorization']?.split(' ')[1] || req.body?.accessToken;
@@ -352,7 +345,7 @@ const logoutUser = async (req, res) => {
     if (!accessToken || !refreshToken) {
       return res
         .status(400)
-        .json(new ApiResponse(400, null, 'No tokens provided'));
+        .json(new ApiResponse(400, null, 'No Tokens Provided'));
     }
 
     if (userId) {
@@ -361,7 +354,6 @@ const logoutUser = async (req, res) => {
       ]);
     }
 
-    // Clear cookies if present (for web clients)
     const response = res.status(200);
     if (req.cookies?.accessToken || req.cookies?.refreshToken) {
       response
@@ -371,15 +363,14 @@ const logoutUser = async (req, res) => {
 
     return response.json(new ApiResponse(200, null, 'Logged out successfully'));
   } catch (error) {
-    console.error('❌ Logout error:', error.message);
+    console.error('Logout Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
 const userDetails = async (req, res) => {
-  console.log('Hit user details controller');
   try {
     const userId = req.params.id;
 
@@ -388,7 +379,7 @@ const userDetails = async (req, res) => {
     if (!userId && !req.user) {
       return res
         .status(400)
-        .json(new ApiResponse(400, null, 'User ID is required'));
+        .json(new ApiResponse(400, null, 'User ID is Required'));
     }
 
     const [rows] = await req.db.query('SELECT * FROM users WHERE id = ?', [
@@ -397,7 +388,7 @@ const userDetails = async (req, res) => {
     console.log('Rows:', rows);
 
     if (rows.length === 0) {
-      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+      return res.status(404).json(new ApiResponse(404, null, 'User Not Found'));
     }
 
     const user = rows[0];
@@ -413,18 +404,18 @@ const userDetails = async (req, res) => {
         new ApiResponse(
           200,
           { user: safeUser },
-          'User details retrieved successfully'
+          'User Details Retrieved Successfully'
         )
       );
   } catch (error) {
-    console.error('❌ User details error:', error.message);
+    console.error('User Details Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
-const verifyUser = async (req, res) => {
+const userEmailVerify = async (req, res) => {
   try {
     const { token } = req?.query;
 
@@ -439,7 +430,7 @@ const verifyUser = async (req, res) => {
         .send(
           htmlTemplateGenerator(
             'Email Verification',
-            'Invalid or expired token',
+            'Invalid or Expired Token',
             false
           )
         );
@@ -455,15 +446,15 @@ const verifyUser = async (req, res) => {
       .send(
         htmlTemplateGenerator(
           'Email Verification',
-          'Thank you for verifying your email!',
+          'Thank you for Verifying Your Email!',
           true
         )
       );
   } catch (error) {
-    console.error('❌ Verification error:', error.message);
+    console.error('Verification Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
@@ -474,7 +465,7 @@ const refreshAccessToken = async (req, res) => {
     if (!incomingToken) {
       return res
         .status(401)
-        .json(new ApiResponse(401, null, 'Refresh token is required'));
+        .json(new ApiResponse(401, null, 'Refresh Token is Required'));
     }
     const decodedToken = jwt.verify(incomingToken, process.env.JWT_SECRET);
     const userId = decodedToken.id;
@@ -487,7 +478,7 @@ const refreshAccessToken = async (req, res) => {
       return res
         .status(403)
         .json(
-          new ApiResponse(403, null, 'Invalid refresh token or user not found')
+          new ApiResponse(403, null, 'Invalid Refresh Token or User Not Found')
         );
     }
     const user = userRows[0];
@@ -514,14 +505,14 @@ const refreshAccessToken = async (req, res) => {
         new ApiResponse(
           200,
           { accessToken, refreshToken },
-          'Access token refreshed successfully'
+          'Access Token Refreshed Successfully'
         )
       );
   } catch (error) {
-    console.log('❌ Error in refreshAccessToken:', error.message);
+    console.log('Error in refreshAccessToken:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
@@ -531,13 +522,13 @@ const allUsers = async (req, res) => {
     return res
       .status(200)
       .json(
-        new ApiResponse(200, { users: rows }, 'Users retrieved successfully')
+        new ApiResponse(200, { users: rows }, 'Users Retrieved Successfully')
       );
   } catch (error) {
-    console.error('❌ Login error:', error.message);
+    console.error('User Retrieval Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 const deleteUser = async (req, res) => {
@@ -549,70 +540,61 @@ const deleteUser = async (req, res) => {
     if (!userId) {
       return res
         .status(400)
-        .json(new ApiResponse(400, null, 'User ID is required'));
+        .json(new ApiResponse(400, null, 'User ID is Required'));
     }
     if (!all) {
       await req.db.query('DELETE FROM users WHERE id = ?', [userId]);
       return res
         .status(200)
-        .json(new ApiResponse(200, null, 'User deleted successfully'));
+        .json(new ApiResponse(200, null, 'User Deleted Successfully'));
     }
     // delete all users
     await req.db.query('DELETE FROM users WHERE id > 0');
     return res
       .status(200)
-      .json(new ApiResponse(200, null, 'All users deleted successfully'));
+      .json(new ApiResponse(200, null, 'All Users Deleted Successfully'));
   } catch (error) {
-    console.error('❌ Delete user error:', error.message);
+    console.error('Delete User Error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
 
 const verifyToken = async (req, res) => {
   try {
-     const token = req.cookies.accessToken || req.body.accessToken;
-     if(!token){
-        return res
-          .status(401)
-          .json(new ApiResponse(401, null, 'Token is required'));
-     }
+    const token = req.cookies.accessToken || req.body.accessToken;
+    if (!token) {
+      return res
+        .status(401)
+        .json(new ApiResponse(401, null, 'Token is required'));
+    }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded || !decoded.id) {
       return res
         .status(403)
-        .json(new ApiResponse(403, null, 'Invalid or expired token'));
+        .json(new ApiResponse(403, null, 'Invalid or Expired Token'));
     }
 
-  return res
+    return res
       .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          null,
-          'Token Verified Successfully'
-        )
-      );
-    
-
+      .json(new ApiResponse(200, null, 'Token Verified Successfully'));
   } catch (error) {
-    console.error('❌ Verify token error:', error.message);
+    console.error(' Verify token error:', error.message);
     return res
       .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
-    
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
-}
+};
 
 module.exports = {
   loginUser,
   registerUser,
   allUsers,
-  verifyUser,
+  userEmailVerify,
   deleteUser,
   logoutUser,
   refreshAccessToken,
   userDetails,
-  verifyToken
+  verifyToken,
 };

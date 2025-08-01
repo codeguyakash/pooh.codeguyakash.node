@@ -5,12 +5,12 @@ const {
   loginUser,
   registerUser,
   allUsers,
-  verifyUser,
+  userEmailVerify,
   logoutUser,
   refreshAccessToken,
   deleteUser,
   userDetails,
-  verifyToken
+  verifyToken,
 } = require('../controllers/user.controller');
 const auth = require('../middlewares/auth.middleware');
 
@@ -25,6 +25,6 @@ router.get('/user/:id', auth, userDetails);
 router.delete('/user/delete/:id', auth, deleteUser);
 
 //verify user route
-router.get('/', verifyUser);
+router.get('/', userEmailVerify);
 
 module.exports = router;
