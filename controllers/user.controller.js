@@ -127,7 +127,7 @@ const registerUser = async (req, res) => {
         )
       );
   } catch (err) {
-    console.error('Registration error:', err.message);
+    console.error('Registration error:', err);
     return res
       .status(500)
       .json(new ApiResponse(500, null, 'Internal Server Error'));
