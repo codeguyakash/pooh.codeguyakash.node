@@ -5,12 +5,12 @@ const authRoutes = require('./routes/user.routes');
 
 const os = require('os');
 
-const rateLimiter = require('./middlewares/ratelimiter.middleware');
+// const rateLimiter = require('./middlewares/ratelimiter.middleware');
 const databaseMiddleware = require('./middlewares/db.middleware');
 
 const app = express();
 
-app.use(rateLimiter(100, 15 * 60 * 1000));
+// app.use(rateLimiter(100, 15 * 60 * 1000));
 app.use(databaseMiddleware);
 app.use(cors());
 app.use(express.json());
