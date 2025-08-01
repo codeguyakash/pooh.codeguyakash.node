@@ -139,7 +139,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUserOLD = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -211,6 +211,106 @@ const loginUser = async (req, res) => {
 
     const { accessToken, refreshToken } =
       await generateAccessAndRefreshTokens(payload);
+
+    return res
+      .status(200)
+      .cookie('accessToken', accessToken, options)
+      .cookie('refreshToken', refreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { user: payload, accessToken, refreshToken },
+          'Login Successfully'
+        )
+      );
+  } catch (error) {
+    console.error('❌ Login error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal server error'));
+  }
+};
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, 'Please provide email and password'));
+    }
+
+    if (
+      email.length < 5 ||
+      email.length > 100 ||
+      password.length < 6 ||
+      password.length > 64
+    ) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(400, null, 'Email or password length is invalid')
+        );
+    }
+
+    const allowedDomains = [
+      '@gmail.com',
+      '@outlook.com',
+      '@icloud.com',
+      '@codeguyakash.in',
+    ];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailPattern.test(email) ||
+      !allowedDomains.some((domain) => email.endsWith(domain))
+    ) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(
+            400,
+            null,
+            'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
+          )
+        );
+    }
+
+    const [rows] = await req.db.query('SELECT * FROM users WHERE email = ?', [
+      email,
+    ]);
+
+    if (rows.length === 0) {
+      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
+    }
+
+    const user = rows[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json(new ApiResponse(401, null, 'Invalid user credentials'));
+    }
+
+    const payload = {
+      id: user.id,
+      uuid: user.uuid,
+      email: user.email,
+      role: user.role,
+      is_verified: user.is_verified === 1 ? true : false,
+      name: user.name,
+    };
+
+    // 🧠 Generate new tokens
+    const { accessToken, refreshToken } =
+      await generateAccessAndRefreshTokens(payload);
+
+    // ✅ Store new refresh token in DB
+    await req.db.query(
+      'UPDATE users SET refresh_token = ?, updated_at = NOW() WHERE id = ?',
+      [refreshToken, user.id]
+    );
 
     return res
       .status(200)
@@ -302,6 +402,8 @@ const userDetails = async (req, res) => {
 
     const user = rows[0];
     const { password, refresh_token, verification_token, ...safeUser } = user;
+
+    safeUser.is_verified = user.is_verified === 1 ? true : false;
 
     console.log(safeUser);
 
