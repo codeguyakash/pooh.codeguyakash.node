@@ -498,7 +498,7 @@ const refreshAccessToken = async (req, res) => {
       email: user.email,
       role: user.role,
       uuid: user.uuid,
-      is_verified: user.is_verified,
+      is_verified: user.is_verified === 1,
     });
 
     await req.db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
