@@ -17,8 +17,11 @@ const {
   updateUser,
 } = require('../controllers/user.controller');
 
-router.post('/login', rateLimiter(10, 15 * 60 * 1000), loginUser);
-router.post('/register', rateLimiter(5, 60 * 60 * 1000), registerUser);
+// router.post('/login', rateLimiter(10, 15 * 60 * 1000), loginUser);
+// router.post('/register', rateLimiter(5, 60 * 60 * 1000), registerUser);
+
+router.post('/login', loginUser);
+router.post('/register', registerUser);
 
 router.post('/token-refresh', refreshAccessToken);
 router.post('/verify', verifyToken);
