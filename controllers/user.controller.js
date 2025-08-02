@@ -362,7 +362,7 @@ const updateUser = async (req, res) => {
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
     values.push(userId);
 
-    await db.query(sql, values);
+    await req.db.query(sql, values);
 
     return res
       .status(200)
@@ -434,7 +434,6 @@ const userDetails = async (req, res) => {
     const [rows] = await req.db.query('SELECT * FROM users WHERE id = ?', [
       userId,
     ]);
-    console.log('Rows:', rows);
 
     if (rows.length === 0) {
       return res.status(404).json(new ApiResponse(404, null, 'User Not Found'));
