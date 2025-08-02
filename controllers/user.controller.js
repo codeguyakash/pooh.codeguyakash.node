@@ -6,6 +6,10 @@ const ApiResponse = require('../utils/ApiResponse');
 const { htmlTemplateGenerator } = require('../utils/htmlTemplateGenerator');
 
 const {
+  sendEmailVerificationNotification,
+} = require('../helper/notifications');
+
+const {
   generateAccessToken,
   generateRefreshToken,
 } = require('../utils/generateToken');
@@ -29,7 +33,7 @@ const generateAccessAndRefreshTokens = async (payload) => {
 };
 
 const registerUser = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, fcm_token } = req.body;
 
   let verificationToken = emailToken(20);
 
@@ -97,7 +101,7 @@ const registerUser = async (req, res) => {
       await generateAccessAndRefreshTokens(user);
 
     const [result] = await req.db.query(
-      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token,refresh_token ,created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token, refresh_token, fcm_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
       [
         uuid,
         name,
@@ -106,10 +110,17 @@ const registerUser = async (req, res) => {
         false,
         verificationToken,
         refreshToken,
+        fcm_token || null,
       ]
     );
 
     let emailResponse = await sendVerifyEmail(email, name, verificationToken);
+    if (fcm_token) {
+      console.log('Notification Sent Successfully');
+      setTimeout(() => {
+        sendEmailVerificationNotification(fcm_token);
+      }, 20000);
+    }
 
     if (!emailResponse.error) {
       console.log('Email Sent Successfully');
@@ -134,97 +145,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUserOLD = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json(new ApiResponse(400, null, 'Please provide email and password'));
-    }
-
-    if (
-      email.length < 5 ||
-      email.length > 100 ||
-      password.length < 6 ||
-      password.length > 64
-    ) {
-      return res
-        .status(400)
-        .json(
-          new ApiResponse(400, null, 'Email or password length is invalid')
-        );
-    }
-
-    const allowedDomains = [
-      '@gmail.com',
-      '@outlook.com',
-      '@icloud.com',
-      '@codeguyakash.in',
-    ];
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (
-      !emailPattern.test(email) ||
-      !allowedDomains.some((domain) => email.endsWith(domain))
-    ) {
-      return res
-        .status(400)
-        .json(
-          new ApiResponse(
-            400,
-            null,
-            'Email Domain is not allowed, please use a valid email domain, such as @gmail.com, @outlook.com, @icloud.com, or @codeguyakash.in'
-          )
-        );
-    }
-
-    const [rows] = await req.db.query('SELECT * FROM users WHERE email = ?', [
-      email,
-    ]);
-
-    if (rows.length === 0) {
-      return res.status(404).json(new ApiResponse(404, null, 'User not found'));
-    }
-
-    const user = rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res
-        .status(401)
-        .json(new ApiResponse(401, null, 'Invalid user credentials'));
-    }
-    const payload = {
-      id: user.id,
-      uuid: user.uuid,
-      email: user.email,
-      role: user.role,
-      is_verified: user.is_verified === 1 ? true : false,
-      name: user.name,
-    };
-
-    const { accessToken, refreshToken } =
-      await generateAccessAndRefreshTokens(payload);
-
-    return res
-      .status(200)
-      .cookie('accessToken', accessToken, options)
-      .cookie('refreshToken', refreshToken, options)
-      .json(
-        new ApiResponse(
-          200,
-          { user: payload, accessToken, refreshToken },
-          'Login Successfully'
-        )
-      );
-  } catch (error) {
-    console.error(' Login error:', error.message);
-    return res
-      .status(500)
-      .json(new ApiResponse(500, null, 'Internal server error'));
-  }
-};
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -291,10 +211,11 @@ const loginUser = async (req, res) => {
     const payload = {
       id: user.id,
       uuid: user.uuid,
+      name: user.name,
       email: user.email,
       role: user.role,
       is_verified: user.is_verified === 1 ? true : false,
-      name: user.name,
+      fcm_token: user.fcm_token || null,
     };
 
     // 🧠 Generate new tokens
@@ -443,8 +364,7 @@ const userDetails = async (req, res) => {
     const { password, refresh_token, verification_token, ...safeUser } = user;
 
     safeUser.is_verified = user.is_verified === 1 ? true : false;
-
-    console.log(safeUser);
+    safeUser.fcm_token = user.fcm_token || null;
 
     return res
       .status(200)
