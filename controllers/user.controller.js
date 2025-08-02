@@ -119,7 +119,7 @@ const registerUser = async (req, res) => {
       console.log('Notification Sent Successfully');
       setTimeout(() => {
         sendEmailVerificationNotification(fcm_token);
-      }, 20000);
+      }, 5000);
     }
 
     if (!emailResponse.error) {
