@@ -14,6 +14,7 @@ const {
   deleteUser,
   userDetails,
   verifyToken,
+  updateUser,
 } = require('../controllers/user.controller');
 
 router.post('/login', rateLimiter(10, 15 * 60 * 1000), loginUser);
@@ -26,6 +27,7 @@ router.get('/logout', auth, logoutUser);
 router.get('/users', auth, allUsers);
 router.get('/user/:id', auth, userDetails);
 router.delete('/user/delete/:id', auth, deleteUser);
+router.put('/user/update/:id', auth, updateUser);
 router.get('/', userEmailVerify);
 
 module.exports = router;

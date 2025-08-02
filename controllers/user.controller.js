@@ -325,6 +325,55 @@ const loginUser = async (req, res) => {
       .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Step 1: Whitelist allowed fields
+    const allowedFields = ['name', 'email', 'role', 'is_verified', 'fcm_token'];
+
+    // Step 2: Filter fields that are not empty/null/undefined
+    const updateFields = Object.fromEntries(
+      Object.entries(req.body).filter(
+        ([key, value]) =>
+          allowedFields.includes(key) &&
+          value !== undefined &&
+          value !== null &&
+          value !== ''
+      )
+    );
+
+    if (Object.keys(updateFields).length === 0) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(400, null, 'No valid fields provided for update')
+        );
+    }
+
+    const fields = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(updateFields)) {
+      fields.push(`${key} = ?`);
+      values.push(value);
+    }
+
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(userId);
+
+    await db.query(sql, values);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { userId }, 'User Updated Successfully'));
+  } catch (error) {
+    console.error('Update User Error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+};
 
 const logoutUser = async (req, res) => {
   try {
@@ -597,4 +646,5 @@ module.exports = {
   refreshAccessToken,
   userDetails,
   verifyToken,
+  updateUser,
 };
