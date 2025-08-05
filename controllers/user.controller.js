@@ -89,7 +89,6 @@ const registerUser = async (req, res) => {
 
     const uuid = uuidv4();
 
-    // Insert first so we get the DB id
     const [result] = await req.db.query(
       'INSERT INTO users (uuid, name, email, password, is_verified, verification_token, fcm_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
       [
@@ -104,7 +103,7 @@ const registerUser = async (req, res) => {
     );
 
     const user = {
-      id: result.insertId, // ✅ now we have DB id
+      id: result.insertId,
       uuid,
       name,
       email,
@@ -113,23 +112,21 @@ const registerUser = async (req, res) => {
       fcm_token: fcm_token || null,
     };
 
-    // ✅ Now generate tokens with id included
     const { accessToken, refreshToken } =
       await generateAccessAndRefreshTokens(user);
 
-    // Update refresh_token in DB
     await req.db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
       refreshToken,
       result.insertId,
     ]);
 
     let emailResponse = await sendVerifyEmail(email, name, verificationToken);
-    if (fcm_token) {
-      console.log('Notification Sent Successfully');
-      setTimeout(() => {
-        sendEmailVerificationNotification(fcm_token);
-      }, 5000);
-    }
+    // if (fcm_token) {
+    //   console.log('Notification Sent Successfully');
+    //   setTimeout(() => {
+    //     sendEmailVerificationNotification({ fcm_token });
+    //   }, 5000);
+    // }
 
     if (!emailResponse.error) {
       console.log('Email Sent Successfully');
@@ -225,11 +222,9 @@ const loginUser = async (req, res) => {
       fcm_token: user.fcm_token || null,
     };
 
-    // 🧠 Generate new tokens
     const { accessToken, refreshToken } =
       await generateAccessAndRefreshTokens(payload);
 
-    // ✅ Store new refresh token in DB
     await req.db.query(
       'UPDATE users SET refresh_token = ?, updated_at = NOW() WHERE id = ?',
       [refreshToken, user.id]
@@ -257,10 +252,8 @@ const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // Step 1: Whitelist allowed fields
     const allowedFields = ['name', 'email', 'role', 'is_verified', 'fcm_token'];
 
-    // Step 2: Filter fields that are not empty/null/undefined
     const updateFields = Object.fromEntries(
       Object.entries(req.body).filter(
         ([key, value]) =>
@@ -568,7 +561,7 @@ const sendNotification = async (req, res) => {
     fcm_token,
   } = req.body;
   try {
-    console.log('Sending notification...', {
+    console.log({
       title,
       body,
       fcm_token,
@@ -578,6 +571,21 @@ const sendNotification = async (req, res) => {
         .status(400)
         .json(new ApiResponse(400, null, 'FCM Token is required'));
     }
+    let response = await sendEmailVerificationNotification({
+      title,
+      body,
+      fcm_token,
+    });
+    if (response.success === false) {
+      return res
+        .status(500)
+        .json(
+          new ApiResponse(500, null, response.message || 'Notification Failed')
+        );
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, response, 'Notification Sent Successfully'));
   } catch (error) {
     console.error('Send Notification Error:', error.message);
     return res
