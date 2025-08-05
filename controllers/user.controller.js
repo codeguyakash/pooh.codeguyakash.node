@@ -34,7 +34,6 @@ const generateAccessAndRefreshTokens = async (payload) => {
 
 const registerUser = async (req, res) => {
   const { email, password, name, fcm_token } = req.body;
-
   let verificationToken = emailToken(20);
 
   if (!email || !password || !name) {
@@ -53,6 +52,7 @@ const registerUser = async (req, res) => {
       .status(400)
       .json(new ApiResponse(400, null, 'Email or Password Length is Invalid'));
   }
+
   const allowedDomains = ['@gmail.com', '@outlook.com', '@codeguyakash.in'];
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -89,19 +89,9 @@ const registerUser = async (req, res) => {
 
     const uuid = uuidv4();
 
-    const user = {
-      name,
-      email,
-      role: 'user',
-      uuid,
-      is_verified: false,
-    };
-
-    const { accessToken, refreshToken } =
-      await generateAccessAndRefreshTokens(user);
-
+    // Insert first so we get the DB id
     const [result] = await req.db.query(
-      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token, refresh_token, fcm_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token, fcm_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
       [
         uuid,
         name,
@@ -109,10 +99,29 @@ const registerUser = async (req, res) => {
         hashedPassword,
         false,
         verificationToken,
-        refreshToken,
         fcm_token || null,
       ]
     );
+
+    const user = {
+      id: result.insertId, // ✅ now we have DB id
+      uuid,
+      name,
+      email,
+      role: 'user',
+      is_verified: false,
+      fcm_token: fcm_token || null,
+    };
+
+    // ✅ Now generate tokens with id included
+    const { accessToken, refreshToken } =
+      await generateAccessAndRefreshTokens(user);
+
+    // Update refresh_token in DB
+    await req.db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [
+      refreshToken,
+      result.insertId,
+    ]);
 
     let emailResponse = await sendVerifyEmail(email, name, verificationToken);
     if (fcm_token) {
@@ -125,8 +134,6 @@ const registerUser = async (req, res) => {
     if (!emailResponse.error) {
       console.log('Email Sent Successfully');
     }
-
-    user.id = result.insertId;
 
     return res
       .status(201)
