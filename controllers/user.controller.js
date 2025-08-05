@@ -561,7 +561,30 @@ const verifyToken = async (req, res) => {
       .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
-
+const sendNotification = async (req, res) => {
+  const {
+    title = 'Default Title',
+    body = 'Default Body',
+    fcm_token,
+  } = req.body;
+  try {
+    console.log('Sending notification...', {
+      title,
+      body,
+      fcm_token,
+    });
+    if (!fcm_token) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, 'FCM Token is required'));
+    }
+  } catch (error) {
+    console.error('Send Notification Error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+};
 module.exports = {
   loginUser,
   registerUser,
@@ -573,4 +596,5 @@ module.exports = {
   userDetails,
   verifyToken,
   updateUser,
+  sendNotification,
 };
