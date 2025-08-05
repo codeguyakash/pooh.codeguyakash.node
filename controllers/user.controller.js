@@ -344,8 +344,6 @@ const userDetails = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    console.log(userId, req.user);
-
     if (!userId && !req.user) {
       return res
         .status(400)

@@ -13,7 +13,7 @@ const serviceAccount = {
   client_x509_cert_url: process.env.S_CLIENT_X509_CERT_URL,
   universe_domain: process.env.S_UNIVERSE_DOMAIN,
 };
-console.log(serviceAccount);
+// console.log(serviceAccount);
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

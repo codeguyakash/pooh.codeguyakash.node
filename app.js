@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/user.routes');
+const messageRoutes = require('./routes/message.routes');
 
 const os = require('os');
 
@@ -19,6 +20,7 @@ app.use(cookieParser());
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/verify', authRoutes);
+app.use('/api/v1/message', messageRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
