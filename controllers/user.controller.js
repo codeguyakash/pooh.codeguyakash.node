@@ -530,12 +530,15 @@ const deleteUser = async (req, res) => {
 const verifyToken = async (req, res) => {
   try {
     const token = req.cookies.accessToken || req.body.accessToken;
+
     if (!token) {
       return res
         .status(401)
         .json(new ApiResponse(401, null, 'Token is required'));
     }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     if (!decoded || !decoded.id) {
       return res
         .status(403)
@@ -546,7 +549,14 @@ const verifyToken = async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, null, 'Token Verified Successfully'));
   } catch (error) {
-    console.error(' Verify token error:', error.message);
+    if (error.name === 'TokenExpiredError') {
+      console.warn('Token has expired');
+      return res
+        .status(401)
+        .json(new ApiResponse(401, null, 'Token has expired'));
+    }
+
+    console.error('Verify token error:', error.message);
     return res
       .status(500)
       .json(new ApiResponse(500, null, 'Internal Server Error'));
