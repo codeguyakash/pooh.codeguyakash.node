@@ -7,6 +7,9 @@ const uploadPath = path.join(__dirname, '../public/avatar');
 // if (!fs.existsSync(uploadPath)) {
 //   fs.mkdirSync(uploadPath, { recursive: true });
 // }
+
+console.log(uploadPath);
+console.log('VERCEL', process.env.VERCEL);
 const isVercel = process.env.VERCEL === '1';
 
 if (!isVercel && !fs.existsSync(uploadPath)) {
