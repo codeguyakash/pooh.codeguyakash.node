@@ -113,6 +113,7 @@ const registerUser = async (req, res) => {
       email,
       role: 'user',
       is_verified: false,
+      avatar_url: avatar,
       fcm_token: fcm_token || null,
     };
 
@@ -222,6 +223,9 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatar_url:
+        user.avatar_url ||
+        `https://robohash.org/${user.uuid}code?gravatar=hashed`,
       is_verified: user.is_verified === 1 ? true : false,
       fcm_token: user.fcm_token || null,
     };
@@ -367,6 +371,9 @@ const userDetails = async (req, res) => {
 
     safeUser.is_verified = user.is_verified === 1 ? true : false;
     safeUser.fcm_token = user.fcm_token || null;
+    safeUser.avatar_url =
+      user.avatar_url ||
+      `https://robohash.org/${user.uuid}code?gravatar=hashed`;
 
     return res
       .status(200)
