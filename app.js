@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/user.routes');
 const messageRoutes = require('./routes/message.routes');
+const path = require('path');
 
 const os = require('os');
 
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(express.static('public'));
+app.use('/avatar', express.static(path.join(__dirname, 'public/avatar')));
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/verify', authRoutes);
