@@ -88,9 +88,12 @@ const registerUser = async (req, res) => {
     );
 
     const uuid = uuidv4();
+    let avatar = `https://robohash.org/${verificationToken}code?gravatar=hashed`;
 
     const [result] = await req.db.query(
-      'INSERT INTO users (uuid, name, email, password, is_verified, verification_token, fcm_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      `INSERT INTO users 
+    (uuid, name, email, password, is_verified, verification_token, avatar_url, fcm_token, created_at, updated_at) 
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         uuid,
         name,
@@ -98,6 +101,7 @@ const registerUser = async (req, res) => {
         hashedPassword,
         false,
         verificationToken,
+        avatar,
         fcm_token || null,
       ]
     );
