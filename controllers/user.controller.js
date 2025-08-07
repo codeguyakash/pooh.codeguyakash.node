@@ -619,12 +619,23 @@ const uploadAvatar = async (req, res) => {
       .json({ success: false, message: 'No file uploaded' });
   }
   let host = process.env.HOST_URL;
-  const avatarUrl = `${host}/avatar/${req.file.filename}`;
+  const avatar = `${host}/avatar/${req.file.filename}`;
+
+  const userId = req.params.id;
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'User ID is required' });
+  }
+  await req.db.query('UPDATE users SET avatar_url = ? WHERE id = ?', [
+    avatar,
+    userId,
+  ]);
 
   res.json({
     success: true,
     message: 'Avatar uploaded successfully',
-    avatar_url: avatarUrl,
+    avatar_url: avatar,
   });
 };
 module.exports = {

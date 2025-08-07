@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const emailToken = require('../utils/emailToken');
 
 const uploadPath = path.join(__dirname, '../public/avatar');
 if (!fs.existsSync(uploadPath)) {
@@ -13,7 +14,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    const uniqueName = `${Date.now()}_${emailToken(10)}${ext}`;
     cb(null, uniqueName);
   },
 });
