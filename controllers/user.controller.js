@@ -612,6 +612,21 @@ const sendNotification = async (req, res) => {
       .json(new ApiResponse(500, null, 'Internal Server Error'));
   }
 };
+const uploadAvatar = async (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'No file uploaded' });
+  }
+  let host = process.env.HOST_URL;
+  const avatarUrl = `${host}/avatar/${req.file.filename}`;
+
+  res.json({
+    success: true,
+    message: 'Avatar uploaded successfully',
+    avatar_url: avatarUrl,
+  });
+};
 module.exports = {
   loginUser,
   registerUser,
@@ -624,4 +639,5 @@ module.exports = {
   verifyToken,
   updateUser,
   sendNotification,
+  uploadAvatar,
 };
