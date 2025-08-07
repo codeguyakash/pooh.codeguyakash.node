@@ -8,6 +8,13 @@
     ],
     "routes": [
         {
+            "src": "/avatar/(.*)",
+            "dest": "/public/avatar/$1",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            }
+        },
+        {
             "src": "/(.*)",
             "dest": "/index.js"
         }

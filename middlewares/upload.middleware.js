@@ -4,7 +4,12 @@ const fs = require('fs');
 const emailToken = require('../utils/emailToken');
 
 const uploadPath = path.join(__dirname, '../public/avatar');
-if (!fs.existsSync(uploadPath)) {
+// if (!fs.existsSync(uploadPath)) {
+//   fs.mkdirSync(uploadPath, { recursive: true });
+// }
+const isVercel = process.env.VERCEL === '1';
+
+if (!isVercel && !fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
 
