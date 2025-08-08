@@ -59,7 +59,22 @@ async function sendVerifyEmail(to, userName, token) {
       </a>
 
       <p style="margin: 20px 0 10px 0">
-        Thank you for using Amazon Web Services.
+        Thank you for using Pooh.
+        <br />
+
+        <a
+          href="https://github.com/codeguyakash/pooh.codeguyakash/releases"
+          style="
+            font-size: 13px;
+            font-weight: 500;
+            color: black;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid red;
+          ">
+          📱Download
+        </a>
       </p>
       <p style="margin: 0">Sincerely,</p>
       <p style="margin: 0">
