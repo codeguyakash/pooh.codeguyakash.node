@@ -7,7 +7,7 @@ async function sendVerifyEmail(to, userName, token) {
       style="
         max-width: 600px;
         margin: 0;
-        padding: 10px 10px;
+        padding: 0;
         font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 13px;
         line-height: 1.6;
