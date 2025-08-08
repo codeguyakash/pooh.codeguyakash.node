@@ -52,7 +52,8 @@ async function sendVerifyEmail(to, userName, token) {
           color: black;
           text-decoration: none;
           cursor: pointer;
-          border-bottom: 1px solid red;
+          font-weight: 600;
+          border-bottom: 2px solid red;
         ">
         ${process.env.HOST_URL}/verify?token=${token}
       </a>
