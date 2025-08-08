@@ -1,9 +1,12 @@
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY || 'RESEND_API_KEY');
-
-async function sendVerifyEmail(to, userName, token) {
-  const html = `
-   <div
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification</title>
+  </head>
+  <body>
+    <div
       style="
         max-width: 600px;
         margin: 0;
@@ -20,10 +23,12 @@ async function sendVerifyEmail(to, userName, token) {
 
       <p style="margin: 0 0 10px 0">
         Hii 👋
+
         <span
           style="color: black; font-weight: 600; border-bottom: 2px solid red">
           ${userName}
         </span>
+
         ,
       </p>
       <p style="margin: 0 0 10px 0">Thank you for Registering!</p>
@@ -55,7 +60,7 @@ async function sendVerifyEmail(to, userName, token) {
           cursor: pointer;
           border-bottom: 2px solid red;
         ">
-        ${process.env.HOST_URL}/verify?token=${token}
+        {process.env.HOST_URL}/verify?token=${token}
       </a>
 
       <p style="margin: 20px 0 10px 0">
@@ -77,27 +82,5 @@ async function sendVerifyEmail(to, userName, token) {
         </a>
       </p>
     </div>
-`;
-
-  try {
-    const res = await resend.emails.send({
-      from: `Pooh (codeguyakash) <no-reply@codeguyakash.in>`,
-      to,
-      subject: `Verify your email address`,
-      html,
-      text: `Please verify your email by clicking: ${process.env.HOST_URL}/verify?token=${token}`,
-    });
-
-    return res;
-  } catch (error) {
-    return {
-      success: false,
-      message: 'Failed to send email',
-      error: error.message || error,
-    };
-  }
-}
-
-module.exports = {
-  sendVerifyEmail,
-};
+  </body>
+</html>
