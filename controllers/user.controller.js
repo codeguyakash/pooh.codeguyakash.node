@@ -656,7 +656,7 @@ const resetPasswordLink = async (req, res) => {
       expiresIn: '1h',
     });
 
-    const resetLink = `https://pooh-ochre.vercel.app?token=${token}`;
+    const resetLink = `https://poohapp.vercel.app?token=${token}`;
     let emailResponse = await sendResetPasswordLink(email, 'User', resetLink);
     console.log(emailResponse);
     return res
