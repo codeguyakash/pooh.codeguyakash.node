@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
-const { sendVerifyEmail } = require('../helper/email.helper');
+const {
+  sendVerifyEmail,
+  sendResetPasswordLink,
+} = require('../helper/email.helper');
 const jwt = require('jsonwebtoken');
 const ApiResponse = require('../utils/ApiResponse');
 const { htmlTemplateGenerator } = require('../utils/htmlTemplateGenerator');
@@ -124,8 +127,9 @@ const registerUser = async (req, res) => {
       refreshToken,
       result.insertId,
     ]);
+    let link = `${process.env.HOST_URL}/verify?token=${verificationToken}`;
 
-    let emailResponse = await sendVerifyEmail(email, name, verificationToken);
+    let emailResponse = await sendVerifyEmail(email, name, link);
     // if (fcm_token) {
     //   console.log('Notification Sent Successfully');
     //   setTimeout(() => {
@@ -392,7 +396,7 @@ const userDetails = async (req, res) => {
   }
 };
 
-const userEmailVerify = async (req, res) => {
+const userEmailVerifyLink = async (req, res) => {
   try {
     const { token } = req?.query;
 
@@ -638,11 +642,73 @@ const uploadAvatar = async (req, res) => {
     avatar_url: avatar,
   });
 };
+const resetPasswordLink = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, 'Email is required'));
+  }
+
+  try {
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
+    const resetLink = `${process.env.HOST_URL}/reset-password?token=${token}`;
+    let emailResponse = await sendResetPasswordLink(email, 'User', resetLink);
+    console.log(emailResponse);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Reset password link sent'));
+  } catch (error) {
+    console.error('Reset Password Link Error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, 'Token and new password are required'));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email;
+
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      parseInt(process.env.SALT_ROUNDS) || 12
+    );
+
+    await req.db.query('UPDATE users SET password = ? WHERE email = ?', [
+      hashedPassword,
+      email,
+    ]);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Password reset successfully'));
+  } catch (error) {
+    console.error('Reset Password Error:', error.message);
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, 'Internal Server Error'));
+  }
+};
+
 module.exports = {
   loginUser,
   registerUser,
   allUsers,
-  userEmailVerify,
+  userEmailVerifyLink,
   deleteUser,
   logoutUser,
   refreshAccessToken,
@@ -651,4 +717,6 @@ module.exports = {
   updateUser,
   sendNotification,
   uploadAvatar,
+  resetPasswordLink,
+  resetPassword,
 };

@@ -9,7 +9,7 @@ const {
   loginUser,
   registerUser,
   allUsers,
-  userEmailVerify,
+  userEmailVerifyLink,
   logoutUser,
   refreshAccessToken,
   deleteUser,
@@ -18,6 +18,8 @@ const {
   updateUser,
   sendNotification,
   uploadAvatar,
+  resetPasswordLink,
+  resetPassword,
 } = require('../controllers/user.controller');
 
 router.post('/login', loginUser);
@@ -29,6 +31,7 @@ router.post('/verify-token', verifyToken);
 router.get('/logout', auth, logoutUser);
 router.get('/users', auth, allUsers);
 router.get('/user/:id', auth, userDetails);
+router.post('/reset-password-link', resetPasswordLink);
 
 router.delete('/user/delete/:id', auth, deleteUser);
 router.put('/user/update/:id', auth, updateUser);
@@ -39,7 +42,8 @@ router.post(
   uploadAvatar
 );
 
-router.get('/', userEmailVerify);
+router.get('/', userEmailVerifyLink);
 router.post('/send-notification', sendNotification);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;
