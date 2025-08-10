@@ -653,7 +653,7 @@ const resetPasswordLink = async (req, res) => {
 
   try {
     const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+      expiresIn: '10m',
     });
 
     const resetLink = `https://poohapp.vercel.app?token=${token}`;
