@@ -43,7 +43,7 @@ router.post(
 );
 
 router.get('/', userEmailVerifyLink);
+router.post('/', resetPassword);
 router.post('/send-notification', sendNotification);
-router.post('/reset-password', resetPassword);
 
 module.exports = router;

@@ -23,6 +23,7 @@ app.use('/avatar', express.static(path.join(__dirname, 'public/avatar')));
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/verify', authRoutes);
+app.use('/reset-password', authRoutes);
 app.use('/api/v1/message', messageRoutes);
 
 app.get('/health', (req, res) => {

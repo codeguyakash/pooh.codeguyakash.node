@@ -673,6 +673,9 @@ const resetPasswordLink = async (req, res) => {
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
 
+  console.log({ token, newPassword });
+  return;
+
   if (!token || !newPassword) {
     return res
       .status(400)
