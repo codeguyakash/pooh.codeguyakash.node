@@ -56,7 +56,7 @@ app.get('/', (req, res) => {
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Pooh (Node)</title>
-      <link rel="icon" href="/avatar/pooh.png" type="image/png" />
+      <link rel="icon" href="https://raw.githubusercontent.com/codeguyakash/com.pooh.codeguyakash/main/src/assets/icons/pooh.png" type="image/png" />
       <style>
        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         body {
@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
       </style>
     </head>
     <body>
-      <img src="/avatar/pooh.png" alt="App Icon" width="100" />
+      <img src="https://raw.githubusercontent.com/codeguyakash/com.pooh.codeguyakash/main/src/assets/icons/pooh.png" alt="App Icon" width="100" />
       <h1>Pooh (Node) API</h1>
       <p style="margin: 0">
         <a
