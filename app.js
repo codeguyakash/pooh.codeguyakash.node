@@ -49,7 +49,48 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Node.js Login Auth API');
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Pooh (Node)</title>
+      <link rel="icon" href="/avatar/pooh.png" type="image/png" />
+      <style>
+       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        body {
+          font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          text-align: center;
+          margin-top: 50px;
+          background-color: #f5f5f5;
+        }
+        h1 {
+          color: #333;
+        }
+      </style>
+    </head>
+    <body>
+      <img src="/avatar/pooh.png" alt="App Icon" width="100" />
+      <h1>Pooh (Node) API</h1>
+      <p style="margin: 0">
+        <a
+          href="https://codeguyakash.in"
+          style="
+            font-size: 13px;
+            font-weight: 500;
+            color: black;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            color:#BD4C00;
+          ">
+          @codeguyakash
+        </a>
+      </p>
+    </body>
+    </html>
+  `);
 });
 
 app.use((req, res) => {
